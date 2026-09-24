@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МаЛяВоЧка — Военные звуки</title>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+    margin:0;
+    min-height:100vh;
+    color:#e9e4d6;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        linear-gradient(90deg,rgba(10,13,7,.90) 0%,rgba(15,19,10,.72) 34%,rgba(17,21,11,.30) 72%,rgba(9,12,6,.14) 100%),
+        linear-gradient(180deg,rgba(40,54,20,.16),rgba(8,10,5,.40)),
+        #0c0f08;
+}
+
+/* Sidebar */
+.sidebar{
+    position:fixed;z-index:100;left:0;top:0;bottom:0;width:220px;
+    padding:126px 12px 22px;
+    background:linear-gradient(180deg,rgba(24,29,16,.78),rgba(11,14,7,.68) 56%,rgba(8,10,5,.80));
+    border-right:1px solid rgba(163,196,90,.21);
+    box-shadow:8px 0 34px rgba(0,0,0,.30),inset -1px 0 rgba(255,255,255,.055);
+    backdrop-filter:blur(16px) saturate(125%);
+}
+.sidebar-menu{display:flex;flex-direction:column;gap:7px}
+.sidebar-item{
+    position:relative;display:flex;align-items:center;gap:13px;min-height:54px;padding:9px 13px;
+    border-radius:12px;color:#a9ac9a;font-size:17px;font-weight:600;cursor:pointer;
+    transition:background .2s,color .2s,transform .18s,box-shadow .2s;
+}
+.sidebar-item:hover{background:rgba(163,196,90,.08);color:#fff;transform:translateX(2px)}
+.sidebar-item.active{
+    background:linear-gradient(135deg,rgba(163,196,90,.22),rgba(120,150,50,.07));
+    color:#c7e26b;box-shadow:inset 0 0 0 1px rgba(163,196,90,.20),0 5px 20px rgba(0,0,0,.18);
+}
+.sidebar-item.active::before{
+    content:"";position:absolute;left:-12px;top:12px;bottom:12px;width:3px;border-radius:0 5px 5px 0;
+    background:#a9d84a;box-shadow:0 0 11px rgba(169,216,74,.62);
+}
+.sidebar-icon{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none;
+    border-radius:9px;background:rgba(255,255,255,.035);font-size:19px;transition:.2s;
+}
+.sidebar-item:hover .sidebar-icon,.sidebar-item.active .sidebar-icon{background:rgba(163,196,90,.13)}
+.sidebar-text{line-height:1.15}
+.sidebar-small{display:block;margin-top:2px;color:#767a68;font-size:11px;font-weight:400}
+
+/* Search */
+.search-toggle{
+    position:fixed;left:20px;top:20px;z-index:210;width:44px;height:44px;display:flex;
+    align-items:center;justify-content:center;border:1px solid rgba(185,214,120,.48);border-radius:50%;
+    background:linear-gradient(135deg,rgba(60,74,30,.78),rgba(13,16,8,.70));color:#e8f2c8;font-size:21px;
+    cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.28),0 0 18px rgba(150,190,60,.29),inset 0 1px 0 rgba(255,255,255,.16);
+    backdrop-filter:blur(13px) saturate(150%);transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+.search-toggle:hover{transform:scale(1.07);border-color:rgba(215,235,160,.85);box-shadow:0 8px 25px rgba(0,0,0,.32),0 0 28px rgba(163,196,90,.49),inset 0 1px 0 rgba(255,255,255,.22)}
+.search-wrap{
+    position:fixed;left:72px;top:19px;z-index:200;padding:4px;border-radius:28px;
+    background:linear-gradient(135deg,rgba(50,63,26,.56),rgba(10,12,7,.52));border:1px solid rgba(180,210,110,.30);
+    box-shadow:0 8px 25px rgba(0,0,0,.24),0 0 18px rgba(150,185,60,.14);backdrop-filter:blur(14px) saturate(145%);
+    opacity:0;pointer-events:none;transform:translateX(-18px) scaleX(.12);transform-origin:left center;
+    transition:opacity .2s ease,transform .2s ease;
+}
+.search-wrap.open{opacity:1;pointer-events:auto;transform:translateX(0) scaleX(1)}
+.search{width:252px;height:45px;padding:0 18px 0 43px;border:1px solid rgba(255,255,255,.12);border-radius:25px;background:rgba(8,10,5,.42);color:#fff;outline:none;font-size:15px}
+.search:focus{border-color:rgba(163,196,90,.72);box-shadow:0 0 15px rgba(163,196,90,.18)}
+.search::placeholder{color:#8e8977}
+.search-icon{position:absolute;left:16px;top:12px;color:#c4cdb0;font-size:19px;pointer-events:none}
+
+/* Main */
+.main{margin-left:220px;min-height:100vh;background:linear-gradient(90deg,rgba(12,15,7,.23),transparent 72%)}
+.header{
+    min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:14px 30px;background:linear-gradient(180deg,rgba(28,34,16,.84),rgba(11,14,7,.77));
+    border-bottom:1px solid rgba(200,225,140,.11);backdrop-filter:blur(16px) saturate(135%);
+}
+.header-title{
+    margin:0;color:#c7e26b;font-size:38px;font-weight:800;line-height:1.15;letter-spacing:.35px;text-align:center;
+    text-shadow:0 0 10px rgba(163,196,90,.62),0 0 27px rgba(120,150,50,.32);
+}
+.back-link{color:#a9ac9a;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:color .15s}
+.back-link:hover{color:#c7e26b}
+
+.content{max-width:1220px;padding:28px 36px 90px}
+.intro{max-width:720px;margin:0 0 24px;color:#c9cab6;font-size:16px;line-height:1.55}
+.soundpack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+.soundpack-card{
+    min-height:74px;display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid rgba(180,210,110,.38);border-radius:12px;
+    background:linear-gradient(135deg,rgba(70,88,34,.30),rgba(14,17,8,.25));
+    box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.09),0 0 12px rgba(140,175,50,.14);
+    cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.soundpack-card:hover{
+    transform:translateY(-2px);border-color:rgba(200,225,140,.92);
+    box-shadow:0 10px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14),0 0 12px rgba(190,225,120,.40);
+}
+.soundpack-icon{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:11px;background:linear-gradient(135deg,#7fae2a,#4f8a3e);box-shadow:0 0 13px rgba(163,196,90,.32);font-size:21px}
+.soundpack-title{margin:0;color:#e9f2cf;font-size:15px;font-weight:800;line-height:1.2}
+.soundpack-desc{display:none}
+.soundpack-card.coming{opacity:.68;cursor:default}.soundpack-card.coming:hover{transform:none;border-color:rgba(180,210,110,.38);box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.09),0 0 12px rgba(140,175,50,.14)}
+
+::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:#0a0c07}::-webkit-scrollbar-thumb{background:#2a2f1e;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#3a4128}
+@media(max-width:900px){
+    .sidebar{width:70px;padding:146px 7px 20px}.sidebar-text{display:none}.sidebar-item{justify-content:center;padding:12px 5px}.sidebar-item.active::before{left:-7px}.main{margin-left:70px}.header{min-height:130px}.header-title{font-size:26px}.content{padding:22px 15px 70px}.search-toggle{left:10px;top:16px}.search-wrap{left:62px;top:16px;right:15px}.search{width:100%}
+}
+</style>
+</head>
+<body>
+<button class="search-toggle" id="searchToggle" type="button" aria-label="Открыть поиск">🔍</button>
+<div class="search-wrap" id="searchWrap">
+    <span class="search-icon">⌕</span>
+    <input class="search" id="searchInput" type="search" placeholder="Поиск раздела…">
+</div>
+
+<aside class="sidebar">
+    <nav class="sidebar-menu">
+        <div class="sidebar-item" onclick="goMusic()"><div class="sidebar-icon">🎧</div><div class="sidebar-text">Music<span class="sidebar-small">Музыка</span></div></div>
+        <div class="sidebar-item" onclick="goOpenings()"><div class="sidebar-icon">🎬</div><div class="sidebar-text">Openings<span class="sidebar-small">Аниме</span></div></div>
+        <div class="sidebar-item" onclick="goRoflan()"><div class="sidebar-icon">😂</div><div class="sidebar-text">Roflan<span class="sidebar-small">Звуки</span></div></div>
+        <div class="sidebar-item" onclick="goGachi()"><div class="sidebar-icon">🎤</div><div class="sidebar-text">Gachi<span class="sidebar-small">Гачи</span></div></div>
+        <div class="sidebar-item" onclick="goScreamer()"><div class="sidebar-icon">😱</div><div class="sidebar-text">Скримеры<span class="sidebar-small">Звуки</span></div></div>
+        <div class="sidebar-item active" onclick="goEffects()"><div class="sidebar-icon">✨</div><div class="sidebar-text">Остальные звуки<span class="sidebar-small">Соундпаки</span></div></div>
+    </nav>
+</aside>
+
+<main class="main">
+    <header class="header">
+        <a class="back-link" href="effects.html">← Назад к соундпакам</a>
+        <h1 class="header-title">⚔️ Военные звуки ⚔️</h1>
+    </header>
+    <section class="content">
+        <p class="intro">Выбирай категорию — каждая кнопка ведёт на отдельную страницу со звуками.</p>
+        <div class="soundpack-grid" id="soundpackGrid">
+            <article class="soundpack-card" data-name="Пуск ракет" onclick="location.href='Rockets.html'">
+                <h2 class="soundpack-title">Пуск ракет</h2><p class="soundpack-desc">Звуки запуска ракет различной техники.</p>
+            </article>
+            <article class="soundpack-card" data-name="Звуки перезарядки техники" onclick="location.href='Reload.html'">
+                <h2 class="soundpack-title">Звуки перезарядки техники</h2><p class="soundpack-desc">Звуки перезарядки боевой техники.</p>
+            </article>
+            <article class="soundpack-card" data-name="Падение снарядов/гильз" onclick="location.href='ShellDrop.html'">
+                <h2 class="soundpack-title">Падение снарядов/гильз</h2><p class="soundpack-desc">Звуки падения снарядов и гильз.</p>
+            </article>
+            <article class="soundpack-card" data-name="Выстрел с Танка" onclick="location.href='TankShot.html'">
+                <h2 class="soundpack-title">Выстрел с Танка</h2><p class="soundpack-desc">Звуки дульного выстрела танкового орудия.</p>
+            </article>
+            <article class="soundpack-card" data-name="Озвучка экипажа «Командир»" onclick="location.href='Commander.html'">
+                <h2 class="soundpack-title">Озвучка экипажа «Командир»</h2><p class="soundpack-desc">Голосовые реплики командира танка.</p>
+            </article>
+            <article class="soundpack-card" data-name="Озвучка экипажа «механик-водитель»" onclick="location.href='Driver.html'">
+                <h2 class="soundpack-title">Озвучка экипажа «механик-водитель»</h2><p class="soundpack-desc">Голосовые реплики механика-водителя.</p>
+            </article>
+        </div>
+    </section>
+</main>
+
+<script>
+const searchToggle=document.getElementById("searchToggle");
+const searchWrap=document.getElementById("searchWrap");
+const searchInput=document.getElementById("searchInput");
+searchToggle.addEventListener("click",event=>{
+    event.stopPropagation();
+    const open=searchWrap.classList.toggle("open");
+    if(open)setTimeout(()=>searchInput.focus(),100);
+});
+document.addEventListener("click",event=>{if(!searchWrap.contains(event.target)&&!searchToggle.contains(event.target))searchWrap.classList.remove("open")});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")searchWrap.classList.remove("open")});
+searchInput.addEventListener("input",()=>{
+    const query=searchInput.value.trim().toLowerCase();
+    document.querySelectorAll(".soundpack-card").forEach(card=>{
+        card.style.display=card.dataset.name.toLowerCase().includes(query)?"":"none";
+    });
+});
+
+function goMusic(){location.href="index.html"}
+function goOpenings(){location.href="Openings.html"}
+function goRoflan(){location.href="Roflan.html"}
+function goGachi(){location.href="Gachi.html"}
+function goScreamer(){location.href="Skrimer.html"}
+function goEffects(){location.href="effects.html"}
+</script>
+</body>
+</html>

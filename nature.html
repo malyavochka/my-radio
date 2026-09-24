@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МаЛяВоЧка — Звуки природы</title>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+    margin:0;
+    min-height:100vh;
+    color:#f7f2df;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        linear-gradient(90deg,rgba(19,15,3,.91) 0%,rgba(30,24,5,.75) 34%,rgba(34,28,8,.31) 72%,rgba(19,16,3,.15) 100%),
+        linear-gradient(180deg,rgba(114,88,9,.16),rgba(11,9,2,.42)),
+        #100e04;
+}
+
+/* Sidebar */
+.sidebar{
+    position:fixed;z-index:100;left:0;top:0;bottom:0;width:220px;
+    padding:126px 12px 22px;
+    background:linear-gradient(180deg,rgba(31,27,10,.78),rgba(13,14,5,.68) 56%,rgba(8,9,3,.80));
+    border-right:1px solid rgba(246,213,86,.21);
+    box-shadow:8px 0 34px rgba(0,0,0,.30),inset -1px 0 rgba(255,255,255,.055);
+    backdrop-filter:blur(16px) saturate(125%);
+}
+.sidebar-menu{display:flex;flex-direction:column;gap:7px}
+.sidebar-item{
+    position:relative;display:flex;align-items:center;gap:13px;min-height:54px;padding:9px 13px;
+    border-radius:12px;color:#b7b5aa;font-size:17px;font-weight:600;cursor:pointer;
+    transition:background .2s,color .2s,transform .18s,box-shadow .2s;
+}
+.sidebar-item:hover{background:rgba(247,206,51,.08);color:#fff;transform:translateX(2px)}
+.sidebar-item.active{
+    background:linear-gradient(135deg,rgba(227,185,37,.22),rgba(255,220,88,.07));
+    color:#ffe17a;box-shadow:inset 0 0 0 1px rgba(251,211,70,.20),0 5px 20px rgba(0,0,0,.18);
+}
+.sidebar-item.active::before{
+    content:"";position:absolute;left:-12px;top:12px;bottom:12px;width:3px;border-radius:0 5px 5px 0;
+    background:#f5ce45;box-shadow:0 0 11px rgba(246,205,49,.62);
+}
+.sidebar-icon{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none;
+    border-radius:9px;background:rgba(255,255,255,.035);font-size:19px;transition:.2s;
+}
+.sidebar-item:hover .sidebar-icon,.sidebar-item.active .sidebar-icon{background:rgba(246,203,47,.13)}
+.sidebar-text{line-height:1.15}
+.sidebar-small{display:block;margin-top:2px;color:#827f6d;font-size:11px;font-weight:400}
+
+/* Search */
+.search-toggle{
+    position:fixed;left:20px;top:20px;z-index:210;width:44px;height:44px;display:flex;
+    align-items:center;justify-content:center;border:1px solid rgba(255,223,110,.48);border-radius:50%;
+    background:linear-gradient(135deg,rgba(128,103,22,.78),rgba(37,30,6,.70));color:#fff3be;font-size:21px;
+    cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.28),0 0 18px rgba(244,199,37,.29),inset 0 1px 0 rgba(255,255,255,.16);
+    backdrop-filter:blur(13px) saturate(150%);transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+.search-toggle:hover{transform:scale(1.07);border-color:rgba(255,240,181,.85);box-shadow:0 8px 25px rgba(0,0,0,.32),0 0 28px rgba(247,205,50,.49),inset 0 1px 0 rgba(255,255,255,.22)}
+.search-wrap{
+    position:fixed;left:72px;top:19px;z-index:200;padding:4px;border-radius:28px;
+    background:linear-gradient(135deg,rgba(101,80,17,.56),rgba(28,24,5,.52));border:1px solid rgba(255,221,108,.30);
+    box-shadow:0 8px 25px rgba(0,0,0,.24),0 0 18px rgba(245,196,27,.14);backdrop-filter:blur(14px) saturate(145%);
+    opacity:0;pointer-events:none;transform:translateX(-18px) scaleX(.12);transform-origin:left center;
+    transition:opacity .2s ease,transform .2s ease;
+}
+.search-wrap.open{opacity:1;pointer-events:auto;transform:translateX(0) scaleX(1)}
+.search{width:252px;height:45px;padding:0 18px 0 43px;border:1px solid rgba(255,255,255,.12);border-radius:25px;background:rgba(14,12,3,.42);color:#fff;outline:none;font-size:15px}
+.search:focus{border-color:rgba(245,205,53,.72);box-shadow:0 0 15px rgba(245,203,38,.18)}
+.search::placeholder{color:#8e8977}
+.search-icon{position:absolute;left:16px;top:12px;color:#d9d0ae;font-size:19px;pointer-events:none}
+
+/* Main */
+.main{margin-left:220px;min-height:100vh;background:linear-gradient(90deg,rgba(37,30,5,.23),transparent 72%)}
+.header{
+    min-height:104px;display:flex;align-items:center;justify-content:center;padding:14px 30px;
+    background:linear-gradient(180deg,rgba(64,53,11,.84),rgba(25,22,5,.77));
+    border-bottom:1px solid rgba(255,235,156,.11);backdrop-filter:blur(16px) saturate(135%);
+}
+.header-title{
+    margin:0;color:#ffe071;font-size:38px;font-weight:800;line-height:1.15;letter-spacing:.35px;text-align:center;
+    text-shadow:0 0 10px rgba(246,205,48,.62),0 0 27px rgba(205,154,20,.32);
+}
+.content{max-width:1220px;padding:28px 36px 90px}
+.intro{max-width:720px;margin:0 0 24px;color:#ddd3ab;font-size:16px;line-height:1.55}
+.soundpack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+.soundpack-card{
+    min-height:74px;display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid rgba(235,201,71,.38);border-radius:12px;
+    background:linear-gradient(135deg,rgba(103,84,16,.30),rgba(27,25,5,.25));
+    box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.09),0 0 12px rgba(225,183,31,.12);
+    cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.soundpack-card:hover{
+    transform:translateY(-2px);border-color:rgba(255,230,132,.92);
+    box-shadow:0 10px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14),0 0 12px rgba(253,211,57,.38);
+}
+.soundpack-icon{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:11px;background:linear-gradient(135deg,#e4b62c,#9d7917);box-shadow:0 0 13px rgba(244,203,48,.30);font-size:21px}
+.soundpack-title{margin:0;color:#fff3bf;font-size:15px;font-weight:800;line-height:1.2}
+.soundpack-desc{display:none}
+.soundpack-card.coming{opacity:.68;cursor:default}.soundpack-card.coming:hover{transform:none;border-color:rgba(235,201,71,.38);box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.09),0 0 12px rgba(225,183,31,.12)}
+.empty-note{margin-top:28px;padding:16px 19px;border-left:3px solid #e4b62c;border-radius:0 12px 12px 0;background:rgba(89,71,13,.23);color:#d7ca95;font-size:14px}
+.back-btn{
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;padding:10px 18px;
+    border:1px solid rgba(235,201,71,.38);border-radius:10px;
+    background:linear-gradient(135deg,rgba(103,84,16,.30),rgba(27,25,5,.25));
+    color:#fff3bf;font-size:14px;font-weight:700;cursor:pointer;
+    box-shadow:0 7px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.09);
+    transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.back-btn:hover{
+    transform:translateY(-2px);border-color:rgba(255,230,132,.92);
+    box-shadow:0 10px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14),0 0 12px rgba(253,211,57,.38);
+}
+
+::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:#0d0d04}::-webkit-scrollbar-thumb{background:#555025;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#756d31}
+@media(max-width:900px){
+    .sidebar{width:70px;padding:146px 7px 20px}.sidebar-menu{padding-top:0;border-top:0}.sidebar-menu::before,.sidebar-text{display:none}.sidebar-item{justify-content:center;padding:12px 5px}.sidebar-item.active::before{left:-7px}.main{margin-left:70px}.header{min-height:116px}.header-title{font-size:28px}.content{padding:22px 15px 70px}.search-toggle{left:10px;top:16px}.search-wrap{left:62px;top:16px;right:15px}.search{width:100%}
+}
+</style>
+</head>
+<body>
+<button class="search-toggle" id="searchToggle" type="button" aria-label="Открыть поиск">🔍</button>
+<div class="search-wrap" id="searchWrap">
+    <span class="search-icon">⌕</span>
+    <input class="search" id="searchInput" type="search" placeholder="Поиск раздела…">
+</div>
+
+<aside class="sidebar">
+    <nav class="sidebar-menu">
+        <div class="sidebar-item" onclick="goMusic()"><div class="sidebar-icon">🎧</div><div class="sidebar-text">Music<span class="sidebar-small">Музыка</span></div></div>
+        <div class="sidebar-item" onclick="goOpenings()"><div class="sidebar-icon">🎬</div><div class="sidebar-text">Openings<span class="sidebar-small">Аниме</span></div></div>
+        <div class="sidebar-item" onclick="goRoflan()"><div class="sidebar-icon">😂</div><div class="sidebar-text">Roflan<span class="sidebar-small">Звуки</span></div></div>
+        <div class="sidebar-item" onclick="goGachi()"><div class="sidebar-icon">🎤</div><div class="sidebar-text">Gachi<span class="sidebar-small">Гачи</span></div></div>
+        <div class="sidebar-item" onclick="goScreamer()"><div class="sidebar-icon">😱</div><div class="sidebar-text">Скримеры<span class="sidebar-small">Звуки</span></div></div>
+        <div class="sidebar-item" onclick="goEffects()"><div class="sidebar-icon">✨</div><div class="sidebar-text">Остальные звуки<span class="sidebar-small">Соундпаки</span></div></div>
+    </nav>
+</aside>
+
+<main class="main">
+    <header class="header"><h1 class="header-title">🌿 Звуки природы 🌿</h1></header>
+    <section class="content">
+        <button class="back-btn" type="button" onclick="goEffects()">← Назад</button>
+
+        <div class="soundpack-grid" id="soundpackGrid">
+
+            <!--
+                ПРИМЕР КАРТОЧКИ (шаблон для копирования):
+
+                <article class="soundpack-card" data-name="Название звука" onclick="location.href='some-page.html'">
+                    <div class="soundpack-icon">🌧️</div>
+                    <h2 class="soundpack-title">Название звука</h2>
+                    <p class="soundpack-desc">Необязательное описание.</p>
+                </article>
+
+                Просто скопируй блок выше столько раз, сколько нужно карточек,
+                и замени: иконку (эмодзи), data-name, текст в <h2> и адрес в onclick.
+            -->
+
+            <article class="soundpack-card" data-name="Шум листьев" onclick="location.href='leaves.html'">
+                <div class="soundpack-icon">🍃</div>
+                <h2 class="soundpack-title">Шум листьев</h2>
+                <p class="soundpack-desc">Шелест листвы на ветру.</p>
+            </article>
+
+            <article class="soundpack-card" data-name="Глубокая ночь" onclick="location.href='night.html'">
+                <div class="soundpack-icon">🌙</div>
+                <h2 class="soundpack-title">Глубокая ночь</h2>
+                <p class="soundpack-desc">Звуки ночного леса.</p>
+            </article>
+
+        </div>
+    </section>
+</main>
+
+<script>
+const searchToggle=document.getElementById("searchToggle");
+const searchWrap=document.getElementById("searchWrap");
+const searchInput=document.getElementById("searchInput");
+searchToggle.addEventListener("click",event=>{
+    event.stopPropagation();
+    const open=searchWrap.classList.toggle("open");
+    if(open)setTimeout(()=>searchInput.focus(),100);
+});
+document.addEventListener("click",event=>{if(!searchWrap.contains(event.target)&&!searchToggle.contains(event.target))searchWrap.classList.remove("open")});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")searchWrap.classList.remove("open")});
+searchInput.addEventListener("input",()=>{
+    const query=searchInput.value.trim().toLowerCase();
+    document.querySelectorAll(".soundpack-card").forEach(card=>{
+        card.style.display=card.dataset.name.toLowerCase().includes(query)?"":"none";
+    });
+});
+
+function goMusic(){location.href="index.html"}
+function goOpenings(){location.href="Openings.html"}
+function goRoflan(){location.href="Roflan.html"}
+function goGachi(){location.href="Gachi.html"}
+function goScreamer(){location.href="Skrimer.html"}
+function goEffects(){location.href="effects.html"}
+</script>
+</body>
+</html>

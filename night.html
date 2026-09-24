@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МаЛяВоЧка — Глубокая ночь</title>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+    margin:0;
+    min-height:100vh;
+    color:#e9e4d6;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        linear-gradient(90deg,rgba(10,13,7,.90) 0%,rgba(15,19,10,.72) 34%,rgba(17,21,11,.30) 72%,rgba(9,12,6,.14) 100%),
+        linear-gradient(180deg,rgba(40,54,20,.16),rgba(8,10,5,.40)),
+        #0c0f08;
+}
+
+/* Sidebar */
+.sidebar{
+    position:fixed;z-index:100;left:0;top:0;bottom:0;width:205px;
+    padding:220px 12px 20px;
+    background:linear-gradient(180deg,rgba(24,29,16,.60),rgba(11,14,7,.50) 55%,rgba(8,10,5,.62) 100%);
+    border-right:1px solid rgba(163,196,90,.18);
+    box-shadow:8px 0 35px rgba(0,0,0,.25),inset -1px 0 rgba(255,255,255,.06);
+    backdrop-filter:blur(16px) saturate(125%);
+}
+.sidebar-menu{display:flex;flex-direction:column;gap:8px}
+.sidebar-item{
+    position:relative;display:flex;align-items:center;gap:13px;min-height:56px;padding:10px 14px;
+    border-radius:13px;color:#a9ac9a;font-size:17px;font-weight:600;cursor:pointer;
+    transition:background .2s,color .2s,transform .18s,box-shadow .2s;
+}
+.sidebar-item:hover{background:rgba(163,196,90,.06);color:#fff;transform:translateX(2px)}
+.sidebar-item.active{
+    background:linear-gradient(135deg,rgba(163,196,90,.16),rgba(120,150,50,.06));
+    color:#c7e26b;box-shadow:inset 0 0 0 1px rgba(163,196,90,.14),0 5px 20px rgba(0,0,0,.14);
+}
+.sidebar-item.active::before{
+    content:"";position:absolute;left:-12px;top:11px;bottom:11px;width:3px;border-radius:0 5px 5px 0;
+    background:#a9d84a;box-shadow:0 0 10px rgba(169,216,74,.5);
+}
+.sidebar-icon{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none;
+    border-radius:9px;background:rgba(255,255,255,.035);font-size:19px;transition:.2s;
+}
+.sidebar-item:hover .sidebar-icon,.sidebar-item.active .sidebar-icon{background:rgba(163,196,90,.09)}
+.sidebar-text{line-height:1.15}
+.sidebar-small{display:block;margin-top:3px;font-size:11px;font-weight:400;color:#6d7360}
+
+/* Search */
+.search-toggle{
+    position:fixed;left:20px;top:20px;z-index:210;width:44px;height:44px;display:flex;
+    align-items:center;justify-content:center;border:1px solid rgba(185,214,120,.40);border-radius:50%;
+    background:linear-gradient(135deg,rgba(60,74,30,.66),rgba(13,16,8,.55));color:#e8f2c8;font-size:21px;
+    cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.26),0 0 18px rgba(150,190,60,.22),inset 0 1px 0 rgba(255,255,255,.16);
+    backdrop-filter:blur(13px) saturate(150%);transition:transform .18s,box-shadow .18s,border-color .18s;
+}
+.search-toggle:hover{transform:scale(1.07);border-color:rgba(215,235,160,.78);box-shadow:0 8px 25px rgba(0,0,0,.30),0 0 28px rgba(163,196,90,.42),inset 0 1px 0 rgba(255,255,255,.22)}
+.search-wrap{
+    position:fixed;left:72px;top:19px;z-index:200;padding:4px;border-radius:28px;
+    background:linear-gradient(135deg,rgba(50,63,26,.42),rgba(10,12,7,.36));border:1px solid rgba(180,210,110,.22);
+    box-shadow:0 8px 25px rgba(0,0,0,.20),0 0 18px rgba(150,185,60,.10);backdrop-filter:blur(14px) saturate(145%);
+    opacity:0;pointer-events:none;transform:translateX(-18px) scaleX(.12);transform-origin:left center;
+    transition:opacity .2s ease,transform .2s ease;
+}
+.search-wrap.open{opacity:1;pointer-events:auto;transform:translateX(0) scaleX(1)}
+.search{width:252px;height:45px;padding:0 18px 0 43px;border:1px solid rgba(255,255,255,.12);border-radius:25px;background:rgba(8,10,5,.40);color:#fff;outline:none;font-size:15px}
+.search:focus{border-color:rgba(163,196,90,.6);box-shadow:0 0 15px rgba(163,196,90,.12)}
+.search::placeholder{color:#767a68}
+.search-icon{position:absolute;left:16px;top:12px;color:#aab29a;font-size:19px;pointer-events:none}
+
+/* Main */
+.main{margin-left:205px;min-height:100vh;background:linear-gradient(90deg,rgba(12,15,7,.18),transparent 72%)}
+.header{
+    position:relative;min-height:114px;display:flex;align-items:center;justify-content:center;
+    padding:18px 30px;background:linear-gradient(180deg,rgba(28,34,16,.72),rgba(11,14,7,.62));
+    backdrop-filter:blur(16px) saturate(135%);border-bottom:1px solid rgba(255,255,255,.08);
+}
+.header-title{margin:0;color:#c7e26b;font-size:36px;font-weight:800;letter-spacing:.5px;text-align:center;
+    text-shadow:0 0 10px rgba(163,196,90,.5),0 0 25px rgba(120,150,50,.2)}
+.back-link{
+    position:absolute;left:30px;top:50%;transform:translateY(-50%);
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 16px;border-radius:12px;
+    border:1px solid rgba(163,196,90,.40);
+    background:linear-gradient(135deg,rgba(70,88,34,.45),rgba(14,17,8,.40));
+    color:#c7e26b;font-size:14px;font-weight:700;text-decoration:none;
+    box-shadow:0 6px 18px rgba(0,0,0,.22),0 0 12px rgba(163,196,90,.14),inset 0 1px 0 rgba(255,255,255,.08);
+    backdrop-filter:blur(10px) saturate(140%);
+    transition:transform .18s,border-color .18s,box-shadow .18s,background .18s;
+}
+.back-link:hover{
+    transform:translateY(-50%) translateX(-2px);
+    border-color:rgba(200,225,140,.85);
+    background:linear-gradient(135deg,rgba(90,112,42,.55),rgba(18,22,10,.50));
+    box-shadow:0 8px 22px rgba(0,0,0,.28),0 0 18px rgba(163,196,90,.32),inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.content{max-width:1120px;margin:0;padding:24px 36px 180px}
+
+.status{text-align:center;padding:60px 20px;color:#7a7d6c;font-size:17px}
+.status.loading{color:#8b8e7c}
+.status.error{max-width:700px;margin:40px auto;padding:30px;border:1px solid rgba(255,90,60,.25);background:rgba(70,20,10,.16);border-radius:14px;color:#ff9977}
+.status.error strong{display:block;color:#ff7a4f;margin-bottom:15px;font-size:18px}
+
+.track{
+    position:relative;background:linear-gradient(135deg,rgba(70,88,34,.15),rgba(10,12,6,.06));
+    border:1px solid rgba(180,210,110,.30);border-radius:13px;padding:7px 12px;margin-bottom:6px;
+    box-shadow:0 10px 30px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.10),0 0 16px rgba(140,175,50,.18);
+    backdrop-filter:blur(8px) saturate(160%);transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.track:hover{transform:translateY(-1px);border-color:rgba(200,225,140,.85);
+    box-shadow:0 12px 38px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.16),0 0 12px rgba(190,225,120,.36),0 0 32px rgba(150,190,60,.30)}
+
+.track-title{display:flex;align-items:center;gap:8px;color:#efeee2;font-size:16px;font-weight:600;margin-bottom:4px;overflow:hidden}
+.track-icon{font-size:22px;flex:none}
+.track-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.card-player{
+    display:flex;align-items:center;gap:10px;width:100%;height:32px;
+    padding:0 12px;border-radius:17px;background:rgba(230,240,210,.14);color:#e6ecd6;
+}
+.card-play-toggle{width:26px;border:0;background:transparent;color:#fff;cursor:pointer;font-size:15px;padding:0}
+.card-time{min-width:82px;color:#c3ccb2;font-size:14px;font-variant-numeric:tabular-nums}
+.card-seek{appearance:none;flex:1;height:4px;border-radius:5px;background:rgba(255,255,255,.24);outline:none;cursor:pointer}
+.card-seek::-webkit-slider-thumb{appearance:none;width:12px;height:12px;border-radius:50%;background:#c7e26b;box-shadow:0 0 8px rgba(163,196,90,.7)}
+.card-seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:#c7e26b}
+
+.buttons{display:flex;gap:9px;position:absolute;top:7px;right:12px}
+.btn{flex:none;min-height:30px;min-width:116px;padding:0 12px;border:0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;color:white;transition:filter .15s,transform .1s,opacity .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:scale(.985)}
+.download-btn{background:#7fae2a;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.copy-btn{background:#4f8a3e}
+.copy-btn.copied{background:#3d6e30}
+
+.empty{text-align:center;color:#7a7d6c;padding:80px 20px;font-size:17px}
+
+.pagination{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:30px}
+.page-btn{min-width:40px;height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:#161810;color:#b9bba9;cursor:pointer;font-size:14px;font-weight:700;transition:.15s}
+.page-btn:hover{background:#1e2116;color:#c7e26b;border-color:rgba(163,196,90,.3)}
+.page-btn.active{background:#7fae2a;color:#fff;border-color:#7fae2a}
+.page-btn:disabled{opacity:.35;cursor:default}
+.page-info{width:100%;text-align:center;color:#63665a;font-size:13px;margin-bottom:7px}
+.page-dots{color:#63665a;padding:0 3px}
+
+/* Mini player */
+.mini-player{
+    position:fixed;left:calc(205px + 24px);right:24px;bottom:18px;z-index:300;display:flex;align-items:center;gap:15px;
+    min-height:72px;padding:10px 16px;border:1px solid rgba(180,210,110,.36);border-radius:18px;
+    background:linear-gradient(135deg,rgba(45,60,22,.88),rgba(11,13,7,.88));
+    box-shadow:0 14px 38px rgba(0,0,0,.36),0 0 26px rgba(150,190,60,.22),inset 0 1px 0 rgba(255,255,255,.12);
+    backdrop-filter:blur(18px) saturate(150%);transform:translateY(115px);opacity:0;pointer-events:none;
+    transition:transform .28s ease,opacity .28s ease;
+}
+.mini-player.visible{transform:translateY(0);opacity:1;pointer-events:auto}
+.mini-player-icon{width:45px;height:45px;display:grid;place-items:center;flex:none;border-radius:13px;background:linear-gradient(135deg,#7fae2a,#4f8a3e);box-shadow:0 0 18px rgba(163,196,90,.42);font-size:22px}
+.mini-player-info{min-width:120px;max-width:330px;flex:1;overflow:hidden}
+.mini-player-label{display:block;margin-bottom:3px;color:#a3c470;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.mini-player-title{overflow:hidden;color:#fff;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.mini-audio{width:min(520px,48%);height:34px;color-scheme:dark;opacity:.9}
+.mini-close{width:32px;height:32px;flex:none;border:0;border-radius:50%;background:rgba(255,255,255,.07);color:#e2edc8;cursor:pointer;font-size:19px;line-height:1}
+.mini-close:hover{background:rgba(127,174,42,.28);color:#fff}
+.mini-visualizer{display:flex;align-items:center;justify-content:center;gap:4px;width:132px;height:42px;padding:7px 12px;border-left:1px solid rgba(180,210,110,.18)}
+.mini-visualizer span{width:5px;height:8px;border-radius:8px;background:linear-gradient(180deg,#dcf0a8 0%,#a3c470 55%,#4f8a3e 100%);box-shadow:0 0 9px rgba(163,196,90,.7);transform-origin:center}
+.mini-player.playing .mini-visualizer span{animation:equalizer .82s ease-in-out infinite alternate}
+.mini-player.playing .mini-visualizer span:nth-child(2){animation-delay:-.38s}
+.mini-player.playing .mini-visualizer span:nth-child(3){animation-delay:-.12s}
+.mini-player.playing .mini-visualizer span:nth-child(4){animation-delay:-.55s}
+.mini-player.playing .mini-visualizer span:nth-child(5){animation-delay:-.25s}
+.mini-player.playing .mini-visualizer span:nth-child(6){animation-delay:-.64s}
+.mini-player.playing .mini-visualizer span:nth-child(7){animation-delay:-.05s}
+.mini-player.playing .mini-visualizer span:nth-child(8){animation-delay:-.45s}
+.mini-player.playing .mini-visualizer span:nth-child(9){animation-delay:-.18s}
+@keyframes equalizer{from{height:7px;opacity:.55}to{height:29px;opacity:1}}
+
+::-webkit-scrollbar{width:9px}
+::-webkit-scrollbar-track{background:#0a0c07}
+::-webkit-scrollbar-thumb{background:#2a2f1e;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#3a4128}
+
+@media(max-width:900px){
+    .mini-player{left:84px;right:14px;bottom:12px}
+    .sidebar{width:70px;padding-top:170px;padding-left:7px;padding-right:7px}
+    .sidebar-item{justify-content:center;padding:17px 5px}
+    .sidebar-text{display:none}
+    .sidebar-item.active::before{left:-7px}
+    .main{margin-left:70px}
+    .header{min-height:150px;padding-top:52px;align-items:flex-start;justify-content:center}
+    .header-title{font-size:22px;padding-top:3px}
+    .back-link{position:static;transform:none;margin-bottom:8px;font-size:12px;padding:8px 12px}
+    .search-wrap{top:16px;left:62px;right:15px}
+    .search-toggle{left:10px;top:16px}
+    .search{width:100%}
+    .content{padding:25px 15px 130px}
+}
+@media(max-width:600px){
+    .mini-player{left:10px;right:10px;gap:9px;min-height:64px;padding:8px 10px;border-radius:15px}
+    .mini-player-icon{width:38px;height:38px;border-radius:11px;font-size:18px}
+    .mini-player-info{min-width:0}
+    .mini-player-label{font-size:9px}
+    .mini-player-title{font-size:12px}
+    .mini-audio{width:42%;height:32px}
+    .mini-visualizer{display:none}
+    .buttons{flex-direction:column}
+    .btn{min-height:42px}
+    .track-title{font-size:17px}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-menu">
+        <div class="sidebar-item" onclick="goMusic()"><div class="sidebar-icon">🎧</div><div class="sidebar-text">Music<span class="sidebar-small">Музыка</span></div></div>
+        <div class="sidebar-item" onclick="goOpenings()"><div class="sidebar-icon">🎬</div><div class="sidebar-text">Openings<span class="sidebar-small">Аниме</span></div></div>
+        <div class="sidebar-item" onclick="goRoflan()"><div class="sidebar-icon">😂</div><div class="sidebar-text">Roflan<span class="sidebar-small">Звуки</span></div></div>
+        <div class="sidebar-item" onclick="goGachi()"><div class="sidebar-icon">🎤</div><div class="sidebar-text">Gachi<span class="sidebar-small">Гачи</span></div></div>
+        <div class="sidebar-item" onclick="goScreamer()"><div class="sidebar-icon">😱</div><div class="sidebar-text">Скримеры<span class="sidebar-small">Звуки</span></div></div>
+        <div class="sidebar-item active" onclick="goEffects()"><div class="sidebar-icon">✨</div><div class="sidebar-text">Остальные звуки<span class="sidebar-small">Соундпаки</span></div></div>
+    </div>
+</div>
+
+<button id="searchToggle" class="search-toggle" type="button" aria-label="Открыть поиск" onclick="toggleSearch(event)">🔍</button>
+
+<div class="main">
+
+    <header class="header">
+        <a class="back-link" href="nature.html">← Назад к звукам природы</a>
+        <h1 class="header-title">🌙 Глубокая ночь 🌙</h1>
+
+        <div class="search-wrap" onclick="event.stopPropagation()">
+            <span class="search-icon">🔍</span>
+            <input id="search" class="search" type="text" placeholder="Найти звук..." autocomplete="off">
+        </div>
+    </header>
+
+    <main id="musicList" class="content">
+        <div class="status loading">Загрузка звуков... 🎵</div>
+    </main>
+
+</div>
+
+<section id="miniPlayer" class="mini-player" aria-label="Мини-плеер">
+    <div class="mini-player-icon" aria-hidden="true">🌙</div>
+    <div class="mini-player-info">
+        <span class="mini-player-label">Сейчас играет</span>
+        <div id="miniPlayerTitle" class="mini-player-title">Выберите звук</div>
+    </div>
+    <audio id="miniAudio" class="mini-audio" controls preload="metadata"></audio>
+    <div class="mini-visualizer" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+    <button id="miniClose" class="mini-close" type="button" aria-label="Закрыть плеер">×</button>
+</section>
+
+<script>
+
+/* =========================================================
+   НАСТРОЙКИ
+   ========================================================= */
+
+const WORKER_URL = "https://malyavochka-music.rxmlopdt.workers.dev";
+
+/* Эта страница использует НОВЫЙ универсальный маршрут Worker'а.
+   "Nature/leaves" — это папка на GitHub, куда заливаются файлы.
+   Файлы там остаются на английском (для ссылок),
+   а русские названия подтягиваются из names.json. */
+
+const FOLDER = "Nature/night";
+
+const LIST_URL = WORKER_URL + "/sound/" + FOLDER + "/list.json";
+
+const TRACKS_PER_PAGE = 50;
+
+const musicList = document.getElementById("musicList");
+const searchInput = document.getElementById("search");
+
+let tracks = [];
+let filteredTracks = [];
+let currentPage = 1;
+
+let activeTrackId = null;
+
+document.body.appendChild(document.querySelector(".search-wrap"));
+
+const miniPlayer = document.getElementById("miniPlayer");
+const miniAudio = document.getElementById("miniAudio");
+const miniPlayerTitle = document.getElementById("miniPlayerTitle");
+const miniClose = document.getElementById("miniClose");
+
+function showMiniPlayer(track){
+    miniPlayerTitle.textContent = removeExtension(String(track.name || ""));
+    miniPlayer.classList.add("visible");
+}
+
+function playInMiniPlayer(track){
+    const url = getPlayURL(track);
+
+    if(miniAudio.src !== url){
+        miniAudio.src = url;
+    }
+
+    showMiniPlayer(track);
+
+    activeTrackId = String(track.id);
+
+    miniAudio.play().catch(()=>{});
+    updateActiveCard();
+}
+
+miniClose.addEventListener("click", ()=>{
+    miniAudio.pause();
+    miniPlayer.classList.remove("visible");
+    miniPlayer.classList.remove("playing");
+    activeTrackId = null;
+});
+
+miniAudio.addEventListener("play", ()=>{miniPlayer.classList.add("playing");updateActiveCard()});
+miniAudio.addEventListener("pause", ()=>{miniPlayer.classList.remove("playing");updateActiveCard()});
+miniAudio.addEventListener("ended", ()=>{miniPlayer.classList.remove("playing");updateActiveCard()});
+miniAudio.addEventListener("timeupdate", updateActiveCard);
+miniAudio.addEventListener("loadedmetadata", updateActiveCard);
+
+
+/* =========================================================
+   ПРОСТОЙ ПОИСК
+   ========================================================= */
+
+function normalizeSearchText(value){
+    return String(value || "")
+        .toLowerCase()
+        .replace(/ё/g, "е")
+        .replace(/[^a-zа-я0-9]+/gi, " ")
+        .trim();
+}
+
+function trackMatches(track, query){
+    const cleanQuery = normalizeSearchText(query);
+    if(!cleanQuery) return true;
+
+    const name = normalizeSearchText(removeExtension(String(track.name || "")));
+
+    const queryParts = cleanQuery.split(/\s+/).filter(Boolean);
+
+    return queryParts.every(part => name.includes(part));
+}
+
+
+/* =========================================================
+   ЗАГРУЗКА СПИСКА
+   ========================================================= */
+
+async function loadMusic(){
+    try{
+        const response = await fetch(LIST_URL + "?t=" + Date.now(), {
+            method: "GET",
+            cache: "no-store",
+            headers: { Accept: "application/json" }
+        });
+
+        if(!response.ok){
+            throw new Error("Worker HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if(!Array.isArray(data)){
+            throw new Error("Worker вернул неправильный JSON");
+        }
+
+        tracks = data.filter(track => track && track.id && track.name);
+
+        currentPage = 1;
+
+        renderTracks();
+    }
+    catch(error){
+        console.error("Ошибка загрузки звуков:", error);
+
+        musicList.innerHTML = `
+            <div class="status error">
+                <strong>🌙 Не удалось загрузить звуки</strong>
+                <div>Worker HTTP ошибка</div>
+                <br>
+                <small>${escapeHTML(error.message)}</small>
+                <br><br>
+                <button class="btn download-btn" onclick="loadMusic()" style="max-width:220px;padding:10px 20px">
+                    ↻ Повторить
+                </button>
+            </div>
+        `;
+    }
+}
+
+
+/* =========================================================
+   URL
+   ========================================================= */
+
+function getPlayURL(track){
+    return WORKER_URL + "/sound/" + FOLDER + "/music/" + encodeURIComponent(track.id);
+}
+
+function getDownloadURL(track){
+    return getPlayURL(track) + "?download=1";
+}
+
+
+/* =========================================================
+   ПЛЕЕР В КАРТОЧКЕ
+   ========================================================= */
+
+function formatPlayerTime(seconds){
+    if(!Number.isFinite(seconds)) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    const remainder = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return minutes + ":" + remainder;
+}
+
+function updateActiveCard(){
+    document.querySelectorAll("[data-card-player]").forEach(player => {
+        const isActive = String(player.dataset.cardPlayer) === activeTrackId;
+        const button = player.querySelector(".card-play-toggle");
+        const time = player.querySelector(".card-time");
+        const seek = player.querySelector(".card-seek");
+        const duration = isActive ? miniAudio.duration : 0;
+        const current = isActive ? miniAudio.currentTime : 0;
+
+        button.textContent = isActive && !miniAudio.paused ? "Ⅱ" : "▶";
+        button.setAttribute("aria-label", isActive && !miniAudio.paused ? "Пауза" : "Воспроизвести");
+        time.textContent = formatPlayerTime(current) + " / " + formatPlayerTime(duration);
+        seek.max = Number.isFinite(duration) && duration > 0 ? duration : 100;
+        seek.value = Number.isFinite(current) ? current : 0;
+    });
+}
+
+function setupCardPlayer(track){
+    const player = document.querySelector('[data-card-player="' + CSS.escape(String(track.id)) + '"]');
+    if(!player) return;
+
+    const button = player.querySelector(".card-play-toggle");
+    const seek = player.querySelector(".card-seek");
+
+    button.addEventListener("click", () => {
+        if(activeTrackId === String(track.id)){
+            if(miniAudio.paused) miniAudio.play().catch(()=>{});
+            else miniAudio.pause();
+            return;
+        }
+        playInMiniPlayer(track);
+    });
+
+    seek.addEventListener("input", () => {
+        if(activeTrackId !== String(track.id)){
+            playInMiniPlayer(track);
+            miniAudio.addEventListener("loadedmetadata", () => {miniAudio.currentTime = Number(seek.value)}, {once:true});
+            return;
+        }
+        miniAudio.currentTime = Number(seek.value);
+        updateActiveCard();
+    });
+
+    updateActiveCard();
+}
+
+
+/* =========================================================
+   ОТРИСОВКА
+   ========================================================= */
+
+function renderTracks(){
+    const query = searchInput.value.trim();
+
+    filteredTracks = tracks
+        .filter(track => trackMatches(track, query))
+        .sort((a, b) => String(a.name).localeCompare(String(b.name), "ru"));
+
+    const totalPages = Math.max(1, Math.ceil(filteredTracks.length / TRACKS_PER_PAGE));
+
+    if(currentPage > totalPages){
+        currentPage = totalPages;
+    }
+
+    if(!filteredTracks.length){
+        musicList.innerHTML = `
+            <div class="empty">
+                🔍 Ничего не найдено
+                <br><br>
+                <span style="color:#666;font-size:14px">Попробуй другое слово из названия</span>
+            </div>
+        `;
+        return;
+    }
+
+    const start = (currentPage - 1) * TRACKS_PER_PAGE;
+    const pageTracks = filteredTracks.slice(start, start + TRACKS_PER_PAGE);
+
+    musicList.innerHTML = pageTracks.map(createTrackHTML).join("") + createPaginationHTML(totalPages);
+
+    pageTracks.forEach(track => setupCardPlayer(track));
+}
+
+
+/* =========================================================
+   КАРТОЧКА ТРЕКА
+   ========================================================= */
+
+function createTrackHTML(track){
+    const id = escapeHTML(String(track.id));
+    const name = escapeHTML(removeExtension(String(track.name || "")));
+
+    return `
+        <div class="track" data-track-id="${id}">
+            <div class="track-title">
+                <span class="track-icon">🌙</span>
+                <span class="track-name">${name}</span>
+            </div>
+
+            <div class="card-player" data-card-player="${id}">
+                <button class="card-play-toggle" type="button" aria-label="Воспроизвести">▶</button>
+                <span class="card-time">0:00 / 0:00</span>
+                <input class="card-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Перемотка">
+            </div>
+
+            <div class="buttons">
+                <a class="btn download-btn" href="${escapeAttribute(getDownloadURL(track))}" download target="_self">
+                    ↓ Скачать MP3
+                </a>
+                <button class="btn copy-btn" type="button" onclick="copyMusicLink(this,'${escapeJS(getPlayURL(track))}')">
+                    🔗 Копировать ссылку
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+
+/* =========================================================
+   ПАГИНАЦИЯ
+   ========================================================= */
+
+function createPaginationHTML(totalPages){
+    if(totalPages <= 1) return "";
+
+    const start = (currentPage - 1) * TRACKS_PER_PAGE + 1;
+    const end = Math.min(currentPage * TRACKS_PER_PAGE, filteredTracks.length);
+
+    let html = `
+        <div class="pagination">
+            <div class="page-info">Показано ${start}–${end} из ${filteredTracks.length}</div>
+            <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>←</button>
+    `;
+
+    const pages = [];
+    for(let i = 1; i <= totalPages; i++){
+        if(i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2){
+            pages.push(i);
+        }
+    }
+
+    let previous = 0;
+    for(const page of pages){
+        if(previous && page - previous > 1){
+            html += `<span class="page-dots">...</span>`;
+        }
+        html += `<button class="page-btn ${page === currentPage ? "active" : ""}" onclick="changePage(${page})">${page}</button>`;
+        previous = page;
+    }
+
+    html += `
+            <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>→</button>
+        </div>
+    `;
+
+    return html;
+}
+
+function changePage(page){
+    const totalPages = Math.max(1, Math.ceil(filteredTracks.length / TRACKS_PER_PAGE));
+    if(page < 1 || page > totalPages) return;
+
+    currentPage = page;
+    renderTracks();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+
+/* =========================================================
+   КОПИРОВАНИЕ
+   ========================================================= */
+
+async function copyMusicLink(button, url){
+    const oldText = button.textContent;
+
+    try{
+        await navigator.clipboard.writeText(url);
+        button.textContent = "✓ Ссылка скопирована";
+        button.classList.add("copied");
+        setTimeout(() => { button.textContent = oldText; button.classList.remove("copied"); }, 1800);
+    }
+    catch(error){
+        const textarea = document.createElement("textarea");
+        textarea.value = url;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        let success = false;
+        try{ success = document.execCommand("copy"); }
+        catch(e){ success = false; }
+
+        textarea.remove();
+
+        if(success){
+            button.textContent = "✓ Ссылка скопирована";
+            button.classList.add("copied");
+            setTimeout(() => { button.textContent = oldText; button.classList.remove("copied"); }, 1800);
+        }
+        else{
+            window.prompt("Скопируй эту ссылку:", url);
+        }
+    }
+}
+
+
+/* =========================================================
+   ПОИСК
+   ========================================================= */
+
+searchInput.addEventListener("input", () => {
+    currentPage = 1;
+    renderTracks();
+});
+
+
+/* =========================================================
+   ПЛАВАЮЩАЯ ЛУПА
+   ========================================================= */
+
+function toggleSearch(event){
+    if(event){ event.stopPropagation(); event.preventDefault(); }
+
+    const searchWrap = document.querySelector(".search-wrap");
+    const isOpen = searchWrap.classList.toggle("open");
+
+    if(isOpen){
+        setTimeout(() => searchInput.focus({preventScroll:true}), 100);
+    }
+}
+
+document.addEventListener("keydown", event => {
+    if(event.key === "Escape"){
+        document.querySelector(".search-wrap").classList.remove("open");
+    }
+});
+
+document.addEventListener("click", event => {
+    const searchWrap = document.querySelector(".search-wrap");
+    const searchToggle = document.getElementById("searchToggle");
+
+    if(!searchWrap.contains(event.target) && !searchToggle.contains(event.target)){
+        searchWrap.classList.remove("open");
+    }
+});
+
+
+/* =========================================================
+   УДАЛЕНИЕ .MP3
+   ========================================================= */
+
+function removeExtension(name){
+    return name.replace(/\.mp3$/i, "");
+}
+
+
+/* =========================================================
+   ESCAPE
+   ========================================================= */
+
+function escapeHTML(value){
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value){
+    return escapeHTML(value);
+}
+
+function escapeJS(value){
+    return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\r/g, "\\r")
+        .replace(/\n/g, "\\n");
+}
+
+
+/* =========================================================
+   НАВИГАЦИЯ
+   ========================================================= */
+
+function goMusic(){ window.location.href = "index.html"; }
+function goOpenings(){ window.location.href = "Openings.html"; }
+function goRoflan(){ window.location.href = "Roflan.html"; }
+function goGachi(){ window.location.href = "Gachi.html"; }
+function goScreamer(){ window.location.href = "Skrimer.html"; }
+function goEffects(){ window.location.href = "effects.html"; }
+
+
+/* =========================================================
+   ЗАПУСК
+   ========================================================= */
+
+loadMusic();
+
+</script>
+
+</body>
+</html>
